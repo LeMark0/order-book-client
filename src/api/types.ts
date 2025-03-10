@@ -77,3 +77,13 @@ export type SymbolStatistics = {
   lastId: number
   count: number
 }
+
+export enum SubscriptionType {
+  Depth = 'depth',
+}
+
+export enum WsMessageMethod {
+  Subscribe = 'SUBSCRIBE',
+  Unsubscribe = 'UNSUBSCRIBE',
+  ListSubscriptions = 'LIST_SUBSCRIPTIONS',
+}

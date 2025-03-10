@@ -2,6 +2,7 @@ import './App.css'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { DashboardPage } from '@/pages/Dashboard/DashboardPage.tsx'
 import { useEffect } from 'react'
+import { WebSocketProvider } from '@/context/WebSocketContext.ts'
 
 const queryClient = new QueryClient()
 
@@ -14,9 +15,11 @@ function App() {
   }, [])
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <DashboardPage />
-    </QueryClientProvider>
+    <WebSocketProvider>
+      <QueryClientProvider client={queryClient}>
+        <DashboardPage />
+      </QueryClientProvider>
+    </WebSocketProvider>
   )
 }
 

@@ -1,4 +1,3 @@
-import { useGetSymbols } from '@/api/hooks'
 import { SymbolList } from './components/SymbolList'
 
 // TODO:
@@ -10,19 +9,5 @@ import { SymbolList } from './components/SymbolList'
 // Symbol list should contain: icon, name, pair, last price, 24h change, 24h volume
 
 export const DashboardPage = () => {
-  const { data, isLoading } = useGetSymbols({ quoteAsset: 'USDT' })
-
-  console.log('isLoading: ', isLoading)
-
-  console.log('data: ', data)
-
-  if (isLoading) {
-    return <div>Loading...</div>
-  }
-
-  return (
-    <div>
-      <SymbolList />
-    </div>
-  )
+  return <SymbolList quoteAsset="USDT" />
 }
