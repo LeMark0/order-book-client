@@ -1,12 +1,12 @@
-import { buildContext } from '@/helpers/buildContext'
+import { buildContext } from '@/lib/buildContext.tsx'
 
 import { createWSConnection } from '@/api/ws'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { SubscriptionType, WsMessageMethod } from '@/api/types.ts'
 import { v4 as uuid } from 'uuid'
-import { useSendWsMessageWithCallback } from '@/hooks/useSendWsMessageWithCallback.ts'
 import ReconnectingWebSocket from 'reconnecting-websocket'
 import { updateSubscription } from '@/helpers/updateSubscription'
+import { useSendWsMessageAsync } from '@/hooks/useSendWsMessageAsync.ts'
 
 type SubscriptionMessageOptions = {
   symbol: string
@@ -32,25 +32,16 @@ function useWebSocket() {
   // const [data, setData] = useState({ orders: [], trades: [], coins: [] })
 
   const wsRef = useRef<ReconnectingWebSocket | null>(null)
-  const { sendWsMessageWithCallback } = useSendWsMessageWithCallback()
-
-  const unsubscribe = useCallback((options: SubscriptionMessageOptions) => {
-    wsRef.current?.send(
-      createSubscriptionMessagePayload(WsMessageMethod.Unsubscribe, options),
-    )
-  }, [])
+  const { sendWsMessageAsync } = useSendWsMessageAsync()
 
   const subscribe = useCallback(
-    (options: SubscriptionMessageOptions) => {
+    async (options: SubscriptionMessageOptions) => {
       const ws = wsRef.current
 
       console.log('try to subscribe: ', options)
 
-      if (
-        !ws ||
-        ws.readyState === WebSocket.CLOSED ||
-        ws.readyState === WebSocket.CONNECTING
-      ) {
+      if (!ws || ws.readyState !== WebSocket.OPEN) {
+        console.warn('Could not subscribe: WebSocket is not connected')
         return
       }
 
@@ -58,46 +49,31 @@ function useWebSocket() {
 
       setSubscriptions((prev) => updateSubscription(prev, options))
 
-      sendWsMessageWithCallback(
-        ws,
-        {
-          method: WsMessageMethod.ListSubscriptions,
-        },
-        (response) => {
-          const subscriptions = response.result || []
+      const subscriptionsResponse = await sendWsMessageAsync(ws, {
+        method: WsMessageMethod.ListSubscriptions,
+      })
 
-          const activeSubscription = subscriptions.find((item) =>
-            item.endsWith(`@${options.subscriptionType}`),
-          )
-
-          if (activeSubscription === newSubscription) {
-            console.log('already subscribed: ', activeSubscription)
-            return
-          }
-
-          if (activeSubscription) {
-            sendWsMessageWithCallback(
-              ws,
-              {
-                method: WsMessageMethod.Unsubscribe,
-                params: [activeSubscription],
-              },
-              () => {
-                console.log('unsubscribed: ', activeSubscription)
-                ws?.send(
-                  createSubscriptionMessagePayload(WsMessageMethod.Subscribe, options),
-                )
-              },
-            )
-            return
-          }
-
-          // subscribe now
-          ws?.send(createSubscriptionMessagePayload(WsMessageMethod.Subscribe, options))
-        },
+      const activeSubscription = subscriptionsResponse.result?.find((item) =>
+        item.endsWith(`@${options.subscriptionType}`),
       )
+
+      if (activeSubscription === newSubscription) {
+        console.log('already subscribed: ', activeSubscription)
+        return
+      }
+
+      if (activeSubscription) {
+        await sendWsMessageAsync(ws, {
+          method: WsMessageMethod.Unsubscribe,
+          params: [activeSubscription],
+        })
+
+        console.log('unsubscribed: ', activeSubscription)
+      }
+
+      ws?.send(createSubscriptionMessagePayload(WsMessageMethod.Subscribe, options))
     },
-    [sendWsMessageWithCallback],
+    [sendWsMessageAsync],
   )
 
   const addEventListener = useCallback(
@@ -159,13 +135,9 @@ function useWebSocket() {
     [addEventListener, subscriptions],
   )
 
-  console.log('subscriptions: ', subscriptions)
-
   return {
     // data,
-    addEventListener,
     subscribe,
-    unsubscribe,
   }
 }
 
