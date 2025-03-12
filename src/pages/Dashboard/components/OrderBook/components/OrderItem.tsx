@@ -7,7 +7,7 @@ type Props = {
   price: string
   quantity: string
   variant: 'ask' | 'bid'
-  relativeVolume: number // Value between 0 and 1 representing volume proportion
+  relativeVolume: number
 }
 
 export const OrderItem = ({ price, quantity, variant, relativeVolume }: Props) => {
@@ -19,8 +19,6 @@ export const OrderItem = ({ price, quantity, variant, relativeVolume }: Props) =
     () => `${Math.min(Math.max(relativeVolume, 0), 1) * 100}%`,
     [relativeVolume],
   )
-
-  console.log('relativeVolume: ', relativeVolume)
 
   return (
     <div className="relative flex justify-between px-2 py-1 rounded-md text-foreground bg-secondary/10 overflow-hidden h-8 hover:bg-muted">
