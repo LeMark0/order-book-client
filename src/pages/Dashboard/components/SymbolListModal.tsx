@@ -1,10 +1,11 @@
 import React, { useCallback, useState } from 'react'
-import { Modal } from '@/components/Modal' // Adjust path
-import { useGetSymbols } from '@/api/hooks' // Adjust path
-import { SymbolCard } from '@/components/SymbolCard' // Adjust path
-import { Input } from '@/components/ui/input' // Adjust path to shadcn Input
-import debounce from 'lodash/debounce' // Import Lodash debounce
-import { Virtuoso } from 'react-virtuoso' // Import react-virtuoso
+import debounce from 'lodash/debounce'
+import { Virtuoso } from 'react-virtuoso'
+
+import { Modal } from '@/components/Modal'
+import { useGetSymbols } from '@/api/hooks'
+import { SymbolCard } from '@/components/SymbolCard'
+import { Input } from '@/components/ui/input'
 
 type Props = {
   isOpen: boolean

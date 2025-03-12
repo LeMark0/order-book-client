@@ -1,8 +1,9 @@
-import { OrderBook } from './components/OrderBook/OrderBook.tsx'
 import { useState } from 'react'
-import { RecentTrades } from '@/pages/Dashboard/components/RecentTrades.tsx'
+
+import { OrderBook } from './components/OrderBook/OrderBook'
+import { RecentTrades } from './components/RecentTrades/RecentTrades'
 import { SymbolSelect } from './components/SymbolSelect'
-import { DEFAULT_SYMBOL, ORDER_BOOK_LIMIT } from './constants.ts'
+import { DEFAULT_SYMBOL, ORDER_BOOK_LIMIT } from './constants'
 
 export const DashboardPage = () => {
   const [symbol, setSymbol] = useState<string>(DEFAULT_SYMBOL)

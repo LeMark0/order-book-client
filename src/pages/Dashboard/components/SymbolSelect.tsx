@@ -1,8 +1,9 @@
-import { useGetSymbols } from '@/api/hooks'
-import { SymbolCard } from '@/components/SymbolCard'
 import { useMemo } from 'react'
 import { useBoolean } from 'usehooks-ts'
-import { SymbolListModal } from '@/pages/Dashboard/components/SymbolListModal.tsx'
+
+import { useGetSymbols } from '@/api/hooks'
+import { SymbolCard } from '@/components/SymbolCard'
+import { SymbolListModal } from './SymbolListModal'
 
 type Props = {
   symbol?: string

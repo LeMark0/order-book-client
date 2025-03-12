@@ -1,8 +1,9 @@
-import { OrderEntry } from '@/api/types.ts'
-import { ORDER_BOOK_LIMIT } from '@/pages/Dashboard/constants.ts'
 import { useMemo } from 'react'
-import { EmptyRow } from '@/pages/Dashboard/components/OrderBook/components/EmptyRow.tsx'
-import { OrderItem } from '@/pages/Dashboard/components/OrderBook/components/OrderItem.tsx'
+
+import { OrderEntry } from '@/api/types'
+import { ORDER_BOOK_LIMIT } from '@/pages/Dashboard/constants'
+import { EmptyRow } from './EmptyRow'
+import { OrderItem } from './OrderItem'
 import { cn } from '@/lib/utils'
 
 type Props = {
@@ -20,6 +21,7 @@ export const OrderList = ({
   title,
   orderLimit = ORDER_BOOK_LIMIT,
   isIdle = false,
+  isLoading,
 }: Props) => {
   const emptyRows = useMemo(
     () => Math.max(0, orderLimit - items.length),
@@ -32,7 +34,7 @@ export const OrderList = ({
   }, [items])
 
   return (
-    <div className={cn('flex-1', { grayscale: isIdle })}>
+    <div className={cn('flex-1', { grayscale: isIdle || isLoading })}>
       <h3 className="mb-2 text-center text-lg">{title}</h3>
       <div className="rounded-md bg-secondary p-2">
         <div className="flex justify-between px-2 py-1 font-medium text-secondary-foreground">
@@ -47,7 +49,9 @@ export const OrderList = ({
             quantity={qty}
             key={`${index}`}
             variant={variant}
-            relativeVolume={maxQuantity > 0 ? parseFloat(qty) / maxQuantity : 0}
+            relativeVolume={
+              maxQuantity > 0 ? parseFloat((parseFloat(qty) / maxQuantity).toFixed(2)) : 0
+            }
           />
         ))}
         {Array(emptyRows)

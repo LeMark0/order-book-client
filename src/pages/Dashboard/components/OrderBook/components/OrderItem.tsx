@@ -1,5 +1,7 @@
-import { formatPrice, formatQuantity } from '@/helpers/numberFormaters.ts'
 import { useMemo } from 'react'
+
+import { formatPrice, formatQuantity } from '@/helpers/numberFormaters'
+import { cn } from '@/lib/utils'
 
 type Props = {
   price: string
@@ -18,10 +20,15 @@ export const OrderItem = ({ price, quantity, variant, relativeVolume }: Props) =
     [relativeVolume],
   )
 
+  console.log('relativeVolume: ', relativeVolume)
+
   return (
-    <div className="relative flex justify-between px-2 py-1 text-foreground bg-secondary/10 min-h-8 hover:bg-muted">
+    <div className="relative flex justify-between px-2 py-1 rounded-md text-foreground bg-secondary/10 overflow-hidden h-8 hover:bg-muted">
       <div
-        className={`absolute top-0 bottom-0 ${barDirection} h-full ${barColor}`}
+        className={cn(`absolute top-0 bottom-0 ${barDirection} h-full ${barColor}`, {
+          'rounded-r-md': variant === 'bid',
+          'rounded-l-md': variant === 'ask',
+        })}
         style={{ width }}
       />
       <span className={`relative z-10 ${textColor}`}>{formatPrice(price)}</span>

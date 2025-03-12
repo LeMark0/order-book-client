@@ -1,6 +1,6 @@
-import { useWatchOrderBookData } from '@/hooks/useWatchOrderBookData.ts'
+import { useWatchOrderBookData } from '@/hooks/useWatchOrderBookData'
 import { useMemo } from 'react'
-import { OrderList } from '@/pages/Dashboard/components/OrderBook/components/OrderList.tsx'
+import { OrderList } from './components/OrderList'
 
 interface OrderBookProps {
   symbol: string | undefined
@@ -32,17 +32,8 @@ export function OrderBook({ symbol, orderLimit = 17 }: OrderBookProps) {
       .slice(0, orderLimit)
   }, [data, orderLimit])
 
-  // if (!data) {
-  //   return (
-  //     <div className="p-4 text-center text-muted-foreground">
-  //       Loading order book for {symbol || 'unknown symbol'}...
-  //     </div>
-  //   )
-  // }
-
   return (
     <div className="flex flex-col gap-4">
-      <h2 className="mb-4 text-center text-xl text-foreground">Order Book</h2>
       <div className="flex flex-col gap-4 md:flex-row">
         <OrderList
           isLoading={!data}
@@ -53,6 +44,7 @@ export function OrderBook({ symbol, orderLimit = 17 }: OrderBookProps) {
           isIdle={isIdle}
         />
         <OrderList
+          isLoading={!data}
           items={asks}
           variant="ask"
           title="Ask"
