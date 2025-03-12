@@ -1,11 +1,11 @@
 import { useCallback } from 'react'
 import { v4 as uuid } from 'uuid'
-import { WsMessageMethod } from '@/api/types.ts'
+import { WsMessageMethods } from '@/api/types.ts'
 import ReconnectingWebSocket from 'reconnecting-websocket'
 
 type WSMessage = {
   id?: string
-  method: WsMessageMethod
+  method: WsMessageMethods
   params?: object
 }
 

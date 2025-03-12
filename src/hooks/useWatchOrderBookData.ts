@@ -1,28 +1,42 @@
-import { useCallback } from 'react'
-import { SubscriptionType } from '@/api/types.ts'
+import { useCallback, useEffect, useState } from 'react'
+import { DepthUpdateMessage, EventTypes, SubscriptionTypes } from '@/api/types.ts'
 import { useWebSocketContext } from '@/context/WebSocketContext.ts'
 
-export const useWatchOrderBookData = () => {
-  // here I need to call WS subscription for depth from the main WS hook
-  // move setSymbol method here
-  // select depth data with memo and return
+export function useWatchOrderBookData(symbol: string | undefined) {
+  const { subscribe, onMessage } = useWebSocketContext()
+  const [orderBook, setOrderBook] = useState<DepthUpdateMessage | null>(null)
 
-  const { subscribe } = useWebSocketContext()
+  const subscribeForSymbol = useCallback(() => {
+    if (!symbol) return
 
-  const subscribeForSymbol = useCallback(
-    (symbol: string) => {
-      const payload = {
-        symbol,
-        subscriptionType: SubscriptionType.Depth,
+    subscribe({
+      symbol: symbol.toLowerCase(),
+      subscriptionType: SubscriptionTypes.Depth,
+      frequency: 1000,
+    })
+  }, [symbol, subscribe])
+
+  const handleDepthMessage = useCallback(
+    (message: DepthUpdateMessage) => {
+      if (symbol && message.s.toLowerCase() === symbol.toLowerCase()) {
+        console.log('handleDepthMessage1: ', message)
+
+        setOrderBook(message)
       }
-
-      subscribe(payload)
     },
-    [subscribe],
+    [symbol],
   )
 
-  return {
-    subscribeForSymbol,
-    // data
-  }
+  useEffect(
+    function manageSubscription() {
+      if (!symbol) return
+
+      subscribeForSymbol()
+      const unsubscribe = onMessage(EventTypes.DepthUpdate, handleDepthMessage)
+      return () => unsubscribe()
+    },
+    [symbol, subscribeForSymbol, handleDepthMessage, onMessage],
+  )
+
+  return orderBook
 }

@@ -1,23 +1,35 @@
-import { buildContext } from '@/lib/buildContext.tsx'
-
-import { createWSConnection } from '@/api/ws'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { SubscriptionType, WsMessageMethod } from '@/api/types.ts'
+import { SubscriptionTypes, WsMessageMethods } from '@/api/types.ts'
 import { v4 as uuid } from 'uuid'
 import ReconnectingWebSocket from 'reconnecting-websocket'
 import { updateSubscription } from '@/helpers/updateSubscription'
 import { useSendWsMessageAsync } from '@/hooks/useSendWsMessageAsync.ts'
+import { createWSConnection } from '@/api/ws'
+import { buildContext } from '@/lib/buildContext.tsx'
 
-type SubscriptionMessageOptions = {
+type MessageHandler = (message: string) => void
+
+type SubscriptionOptions = {
   symbol: string
-  subscriptionType: SubscriptionType
+  subscriptionType: SubscriptionTypes
+  frequency?: number
+}
+
+function createSubscriptionValue({
+  symbol,
+  subscriptionType,
+  frequency,
+}: SubscriptionOptions) {
+  const frequencyFormatted = frequency ? `${frequency}ms` : undefined
+
+  return [symbol, subscriptionType, frequencyFormatted].filter(Boolean).join('@')
 }
 
 function createSubscriptionMessagePayload(
-  method: WsMessageMethod,
-  { symbol, subscriptionType }: SubscriptionMessageOptions,
+  method: WsMessageMethods,
+  options: SubscriptionOptions,
 ) {
-  const streamParams = `${symbol}@${subscriptionType}`
+  const streamParams = createSubscriptionValue(options)
 
   return JSON.stringify({
     method,
@@ -28,116 +40,121 @@ function createSubscriptionMessagePayload(
 
 function useWebSocket() {
   const [subscriptions, setSubscriptions] = useState<string[]>([])
-
-  // const [data, setData] = useState({ orders: [], trades: [], coins: [] })
-
   const wsRef = useRef<ReconnectingWebSocket | null>(null)
   const { sendWsMessageAsync } = useSendWsMessageAsync()
 
+  // Registry for message handlers by event type
+  const handlersRef = useRef<Map<string, Set<MessageHandler>>>(new Map())
+
   const subscribe = useCallback(
-    async (options: SubscriptionMessageOptions) => {
+    async (options: SubscriptionOptions) => {
       const ws = wsRef.current
 
-      console.log('try to subscribe: ', options)
+      setSubscriptions((prev) => updateSubscription(prev, options))
 
       if (!ws || ws.readyState !== WebSocket.OPEN) {
         console.warn('Could not subscribe: WebSocket is not connected')
         return
       }
 
-      const newSubscription = `${options.symbol}@${options.subscriptionType}`
+      const newSubscription = createSubscriptionValue(options)
 
-      setSubscriptions((prev) => updateSubscription(prev, options))
+      console.log('newSubscription: ', newSubscription)
 
       const subscriptionsResponse = await sendWsMessageAsync(ws, {
-        method: WsMessageMethod.ListSubscriptions,
+        method: WsMessageMethods.ListSubscriptions,
       })
 
       const activeSubscription = subscriptionsResponse.result?.find((item) =>
-        item.endsWith(`@${options.subscriptionType}`),
+        item.includes(`@${options.subscriptionType}`),
       )
 
       if (activeSubscription === newSubscription) {
-        console.log('already subscribed: ', activeSubscription)
+        console.log('Already subscribed:', activeSubscription)
         return
       }
 
       if (activeSubscription) {
         await sendWsMessageAsync(ws, {
-          method: WsMessageMethod.Unsubscribe,
+          method: WsMessageMethods.Unsubscribe,
           params: [activeSubscription],
         })
-
-        console.log('unsubscribed: ', activeSubscription)
+        console.log('Unsubscribed:', activeSubscription)
       }
 
-      ws?.send(createSubscriptionMessagePayload(WsMessageMethod.Subscribe, options))
+      ws?.send(createSubscriptionMessagePayload(WsMessageMethods.Subscribe, options))
     },
     [sendWsMessageAsync],
   )
 
-  const addEventListener = useCallback(
-    (event: 'message' | 'open' | 'close', listener: EventListener) => {
-      const ws = wsRef.current
-      if (!ws) return
+  // Register a handler for a specific event type
+  const onMessage = useCallback((eventType: string, handler: MessageHandler) => {
+    if (!handlersRef.current.has(eventType)) {
+      handlersRef.current.set(eventType, new Set())
+    }
+    handlersRef.current.get(eventType)!.add(handler)
 
-      ws.removeEventListener(event, listener)
-      ws.addEventListener(event, listener)
+    return () => {
+      handlersRef.current.get(eventType)?.delete(handler)
+    }
+  }, [])
 
-      return () => ws.removeEventListener(event, listener)
-    },
-    [],
-  )
+  // Centralized message handling
+  const handleMessage = useCallback((event: MessageEvent) => {
+    const message = JSON.parse(event.data)
+    const eventType = message.e // Assuming 'e' is the event type field (e.g., 'depthUpdate')
 
-  useEffect(function initializeConnection() {
-    if (!wsRef.current) {
-      console.log('initializeConnection(): ')
-      wsRef.current = createWSConnection()
-
-      wsRef.current.onmessage = (event) => {
-        const message = JSON.parse(event.data)
-        console.log(message)
-      }
-
-      return function cleanup() {
-        if (!wsRef.current) {
-          return
-        }
-
-        wsRef.current.close()
-        wsRef.current = null
-      }
+    if (eventType && handlersRef.current.has(eventType)) {
+      const handlers = handlersRef.current.get(eventType)!
+      handlers.forEach((handler) => handler(message))
     }
   }, [])
 
   useEffect(
-    function restoreSubscriptions() {
-      const removeListener = addEventListener('open', () => {
-        if (subscriptions.length) {
-          console.log('re-subscribe: ', subscriptions)
+    function initializeConnection() {
+      if (!wsRef.current) {
+        console.log('initializeConnection(): ')
+        wsRef.current = createWSConnection()
+        wsRef.current.addEventListener('message', handleMessage)
 
-          wsRef.current?.send(
+        return () => {
+          wsRef.current?.close()
+          wsRef.current?.removeEventListener('message', handleMessage)
+          wsRef.current = null
+        }
+      }
+    },
+    [handleMessage],
+  )
+
+  useEffect(
+    function restoreSubscriptions() {
+      const ws = wsRef.current
+      if (!ws) return
+
+      const handleOpen = () => {
+        if (subscriptions.length) {
+          console.log('Re-subscribe:', subscriptions)
+          ws.send(
             JSON.stringify({
-              method: WsMessageMethod.Subscribe,
+              method: WsMessageMethods.Subscribe,
               params: subscriptions,
               id: uuid(),
             }),
           )
         }
-      })
-
-      return function cleanup() {
-        if (removeListener) {
-          removeListener()
-        }
       }
+
+      ws.addEventListener('open', handleOpen)
+      return () => ws.removeEventListener('open', handleOpen)
     },
-    [addEventListener, subscriptions],
+    [subscriptions],
   )
 
   return {
-    // data,
+    ws: wsRef.current,
     subscribe,
+    onMessage,
   }
 }
 

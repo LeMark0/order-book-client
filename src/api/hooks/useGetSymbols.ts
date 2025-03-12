@@ -2,12 +2,14 @@ import { useQuery } from '@tanstack/react-query'
 import { fetchSymbolsDetails, fetchSymbolsStatistics } from '../rest'
 import { SymbolInfo, SymbolStatistics } from '../types'
 import { useMemo } from 'react'
+import { getSymbolName } from '@/helpers/getSymbolName.ts'
 
 type Options = {
   quoteAsset: string
+  includeInactive?: boolean
 }
 
-export const useGetSymbols = ({ quoteAsset }: Options) => {
+export const useGetSymbols = ({ quoteAsset, includeInactive }: Options) => {
   const {
     data: symbolsDetails,
     isLoading: isLoadingDetails,
@@ -26,12 +28,13 @@ export const useGetSymbols = ({ quoteAsset }: Options) => {
     queryKey: ['symbolsStatistics'],
     select: (data) => data.filter((stat) => stat.symbol.endsWith(quoteAsset)),
     queryFn: fetchSymbolsStatistics,
+    refetchInterval: 60_000,
   })
 
   const data = useMemo(() => {
     if (!symbolsDetails || !symbolsStatistics) return []
 
-    return symbolsDetails.map(
+    const list = symbolsDetails.map(
       ({ quoteAsset, baseAsset, symbol, baseAssetPrecision, quotePrecision }) => ({
         quoteAsset,
         baseAsset,
@@ -39,9 +42,16 @@ export const useGetSymbols = ({ quoteAsset }: Options) => {
         baseAssetPrecision,
         quotePrecision,
         stats: symbolsStatistics.find((stat) => stat.symbol === symbol),
+        symbolName: getSymbolName(baseAsset),
       }),
     )
-  }, [symbolsDetails, symbolsStatistics])
+
+    if (includeInactive) {
+      return list
+    }
+
+    return list.filter((symbol) => symbol.stats?.count !== 0)
+  }, [includeInactive, symbolsDetails, symbolsStatistics])
 
   return {
     data,

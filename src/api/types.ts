@@ -1,4 +1,4 @@
-import { SymbolName } from '@/helpers/getCoinName.ts'
+import { SymbolName } from '@/helpers/getSymbolName.ts'
 
 type RateLimit = {
   rateLimitType?: string
@@ -69,8 +69,8 @@ export type SymbolStatistics = {
   openPrice: string
   highPrice: string
   lowPrice: string
-  volume: string
-  quoteVolume: string
+  volume: string // Total trade volume (in base asset)
+  quoteVolume: string // Total trade volume (in quote asset)
   openTime: number
   closeTime: number
   firstId: number
@@ -78,12 +78,50 @@ export type SymbolStatistics = {
   count: number
 }
 
-export enum SubscriptionType {
+export type TradeDetails = {
+  id: number
+  price: string
+  qty: string
+  quoteQty: string
+  time: number
+  isBuyerMaker: boolean
+  isBestMatch: boolean
+}
+
+export enum SubscriptionTypes {
   Depth = 'depth',
 }
 
-export enum WsMessageMethod {
+export enum WsMessageMethods {
   Subscribe = 'SUBSCRIBE',
   Unsubscribe = 'UNSUBSCRIBE',
   ListSubscriptions = 'LIST_SUBSCRIPTIONS',
 }
+
+export enum EventTypes {
+  DepthUpdate = 'depthUpdate',
+}
+
+type BaseStreamMessage = {
+  e: string // Event type
+  E: number // Event time
+  s: string // Symbol
+}
+
+type AdditionalProps = {
+  [key: string]: unknown
+}
+
+export type StreamMessage<T> = BaseStreamMessage & AdditionalProps & T
+
+export type OrderEntry = [string, string] // [price, quantity]
+
+export type DepthUpdateMessage = StreamMessage<{
+  e: 'depthUpdate' // Event type
+  E: number // Event time in milliseconds
+  s: string // Symbol
+  U: number // First update ID in the event
+  u: number // Last update ID in the event
+  b: OrderEntry[] // Array of bid updates
+  a: OrderEntry[] // Array of ask updates
+}>
