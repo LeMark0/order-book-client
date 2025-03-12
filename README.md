@@ -30,11 +30,11 @@ A real-time cryptocurrency order book dashboard built with React, TypeScript, an
 
 1.  **Clone the Repository**:
 
-
+```
     git clone https://github.com/LeMark0/order-book-client.git
     cd order-book-client
     yarn
-
+```
 
 ## Run the Development Server
 
