@@ -1,54 +1,56 @@
-# React + TypeScript + Vite
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+# Crypto Order Book
 
-Currently, two official plugins are available:
+A real-time cryptocurrency order book dashboard built with React, TypeScript, and Tailwind CSS. Displays bids and asks for a selected trading pair, fetched via WebSocket, with visual indicators like volume bars and idle state detection.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Features
 
-## Expanding the ESLint configuration
+-   **Real-Time Updates**: Subscribes to WebSocket streams for live order book data.
+-   **Bids and Asks**: Displays buy (bids) and sell (asks) orders with prices and quantities.
+-   **Volume Visualization**: Background progress bars indicate relative volume (green for bids, red for asks).
+-   **Idle Detection**: Grays out the list if no updates occur within 3 seconds.
+-   **Responsive Design**: Adapts to mobile and desktop layouts using Tailwind CSS.
+-   **Formatted Numbers**: Custom helpers for price, quantity, and volume formatting.
+-   **Virtualized Symbol List**: To ensure smooth scrolling and improved performance, the symbol list is virtualized. This allows for efficient rendering of large datasets by only rendering items that are currently visible on the screen.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Tech Stack
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+-   **React**: Frontend library for building UI components.
+-   **TypeScript**: Static typing for better code reliability.
+-   **Tailwind CSS**: Utility-first CSS framework for styling.
+-   **WebSocket**: Real-time data streaming via a custom context.
+-   **Vite**: Fast build tool and development server.
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Prerequisites
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+-   **Node.js**: Version 18.x or higher.
+-   **npm**: Version 9.x or higher (or use yarn/pnpm if preferred).
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
-```
+## Installation
+
+1.  **Clone the Repository**:
+
+
+    git clone https://github.com/LeMark0/order-book-client.git
+    cd order-book-client
+    yarn
+
+
+## Run the Development Server
+
+    yarn start
+
+## Usage
+
+-   **Select a Symbol**: Pass a trading pair (e.g., "BTCUSDT") to the OrderBook component.
+-   **View Order Book**: See bids (green) and asks (red) with real-time updates.
+-   **Idle State**: If no updates occur for 3 seconds, the list grays out.
+
+## Future Improvements
+
+As an MVP, this project can be enhanced in several ways:
+
+-   **Test Coverage**: Expand unit and integration tests for components and hooks.
+-   **Accessibility (a11y)**: Add ARIA labels, keyboard navigation, and screen reader support.
+-   **Better Empty States**: Improve UX for no-data scenarios with informative messages or placeholders.
+-   **Error Handling**: Implement robust error boundaries and WebSocket reconnection logic.

@@ -11,11 +11,11 @@ export const DashboardPage = () => {
   return (
     <div className="flex flex-col gap-4">
       <SymbolSelect quoteAsset="USDT" symbol={symbol} onChange={setSymbol} />
-      <div className="flex w-full h-full gap-16 flex-1">
-        <div className="w-1/2">
+      <div className="flex flex-col w-full h-full gap-16 flex-1 sm:flex-row ">
+        <div className="w-full sm:w-1/2">
           <OrderBook symbol={symbol} orderLimit={ORDER_BOOK_LIMIT} />
         </div>
-        <div className="w-1/2">
+        <div className="w-full sm:w-1/2">
           <RecentTrades symbol={symbol} />
         </div>
       </div>
