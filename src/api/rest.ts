@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { ExchangeInfo, SymbolInfo, SymbolStatistics, TradeDetails } from './types' // Assuming types are defined in 'types.ts'
+import { ExchangeInfo, SymbolInfo, SymbolStatistics, TradeDetails } from './types'
 
 const BASE_URL = 'https://api.binance.com/api/v3'
 

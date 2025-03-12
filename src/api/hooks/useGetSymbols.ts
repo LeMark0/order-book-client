@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { fetchSymbolsDetails, fetchSymbolsStatistics } from '../rest'
 import { SymbolInfo, SymbolStatistics } from '../types'
 import { useMemo } from 'react'
-import { getSymbolName } from '@/helpers/getSymbolName.ts'
+import { getSymbolName } from '@/helpers/getSymbolName'
 
 type Options = {
   quoteAsset: string

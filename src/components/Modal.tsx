@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { cn } from '@/lib/utils' // Optional shadcn utility
+import { cn } from '@/lib/utils'
 
 type ModalProps = {
   isOpen: boolean

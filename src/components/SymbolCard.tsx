@@ -1,7 +1,7 @@
-import { Ticker } from '@/helpers/getSymbolName.ts'
-import { formatPrice, formatVolume, percentFormatter } from '@/helpers/numberFormaters.ts'
-import { cn } from '@/lib/utils.ts'
-import { Card } from '@/components/ui/card.tsx'
+import { Ticker } from '@/helpers/getSymbolName'
+import { formatPrice, formatVolume, percentFormatter } from '@/helpers/numberFormaters'
+import { cn } from '@/lib/utils'
+import { Card } from '@/components/ui/card'
 
 type Props = {
   onClick?: () => void

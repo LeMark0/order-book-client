@@ -18,12 +18,5 @@ export const createWSConnection = (urlParams?: string) => {
     console.log('WebSocket disconnected')
   }
 
-  // ws.onmessage = (event) => {
-  //   // TODO remove from here
-  //   const message = JSON.parse(event.data)
-  //   console.log('Received message:', message)
-  //   // Process message to update state
-  // }
-
   return ws
 }
