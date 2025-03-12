@@ -2,9 +2,12 @@ import { useCallback, useEffect, useState } from 'react'
 import { DepthUpdateMessage, EventTypes, SubscriptionTypes } from '@/api/types.ts'
 import { useWebSocketContext } from '@/context/WebSocketContext.ts'
 
+const IDLE_TIME = 3000
+
 export function useWatchOrderBookData(symbol: string | undefined) {
   const { subscribe, onMessage } = useWebSocketContext()
   const [orderBook, setOrderBook] = useState<DepthUpdateMessage | null>(null)
+  const [isIdle, setIsIdle] = useState(false)
 
   const subscribeForSymbol = useCallback(() => {
     if (!symbol) return
@@ -20,7 +23,6 @@ export function useWatchOrderBookData(symbol: string | undefined) {
     (message: DepthUpdateMessage) => {
       if (symbol && message.s.toLowerCase() === symbol.toLowerCase()) {
         console.log('handleDepthMessage: ', message)
-
         setOrderBook(message)
       }
     },
@@ -29,6 +31,8 @@ export function useWatchOrderBookData(symbol: string | undefined) {
 
   useEffect(
     function manageSubscription() {
+      setOrderBook(null)
+
       if (!symbol) return
 
       subscribeForSymbol()
@@ -38,5 +42,25 @@ export function useWatchOrderBookData(symbol: string | undefined) {
     [symbol, subscribeForSymbol, handleDepthMessage, onMessage],
   )
 
-  return orderBook
+  useEffect(
+    function checkIfIdle() {
+      const checkIdle = () => {
+        if (!orderBook || !orderBook.E) {
+          setIsIdle(true)
+          return
+        }
+        const now = Date.now()
+        const lastUpdate = orderBook.E
+        setIsIdle(now - lastUpdate > IDLE_TIME)
+      }
+
+      checkIdle()
+      const interval = setInterval(checkIdle, 1000)
+
+      return () => clearInterval(interval)
+    },
+    [orderBook],
+  )
+
+  return { data: orderBook, isIdle }
 }

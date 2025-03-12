@@ -25,8 +25,8 @@ export const RecentTrades = ({ symbol }: Props) => {
   }
 
   return (
-    <div className="max-w-lg mx-auto p-4">
-      <h2 className="text-xl font-bold text-center mb-4">Recent Trades for {symbol}</h2>
+    <div className="flex flex-col gap-4">
+      <h2 className="text-xl font-bold text-center mb-4">Recent Trades</h2>
       <div className="flex flex-col gap-2 overflow-y-auto">
         {/* Header */}
         <div className="flex justify-between p-2 bg-gray-100 rounded-md font-medium text-gray-700">

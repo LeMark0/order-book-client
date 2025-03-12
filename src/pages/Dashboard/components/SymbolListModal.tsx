@@ -84,7 +84,6 @@ export const SymbolListModal = ({ isOpen, onClose, data, onChange }: Props) => {
                   </div>
                 )
               }}
-              // className="scrollbar-hidden"
             />
           )}
         </div>
