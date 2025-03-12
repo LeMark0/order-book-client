@@ -1,4 +1,4 @@
-import { SymbolName } from '@/helpers/getSymbolName.ts'
+import { Ticker } from '@/helpers/getSymbolName'
 
 type RateLimit = {
   rateLimitType?: string
@@ -17,9 +17,9 @@ type Filter = {
 export type SymbolInfo = {
   symbol: string
   status: string
-  baseAsset: SymbolName
+  baseAsset: Ticker
   baseAssetPrecision: number
-  quoteAsset: SymbolName
+  quoteAsset: Ticker
   quotePrecision?: number // Marked for deprecation in future versions
   quoteAssetPrecision: number
   baseCommissionPrecision: number
@@ -108,16 +108,12 @@ type BaseStreamMessage = {
   s: string // Symbol
 }
 
-type AdditionalProps = {
-  [key: string]: unknown
-}
-
-export type StreamMessage<T> = BaseStreamMessage & AdditionalProps & T
+export type StreamMessage<T = Record<string, never>> = BaseStreamMessage & T
 
 export type OrderEntry = [string, string] // [price, quantity]
 
 export type DepthUpdateMessage = StreamMessage<{
-  e: 'depthUpdate' // Event type
+  e: EventTypes.DepthUpdate // Event type
   E: number // Event time in milliseconds
   s: string // Symbol
   U: number // First update ID in the event

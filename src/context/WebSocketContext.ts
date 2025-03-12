@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { SubscriptionTypes, WsMessageMethods } from '@/api/types.ts'
+import { StreamMessage, SubscriptionTypes, WsMessageMethods } from '@/api/types.ts'
 import { v4 as uuid } from 'uuid'
 import ReconnectingWebSocket from 'reconnecting-websocket'
 import { updateSubscription } from '@/helpers/updateSubscription'
@@ -7,7 +7,7 @@ import { useSendWsMessageAsync } from '@/hooks/useSendWsMessageAsync.ts'
 import { createWSConnection } from '@/api/ws'
 import { buildContext } from '@/lib/buildContext.tsx'
 
-type MessageHandler = (message: string) => void
+type MessageHandler<T = Record<string, never>> = (message: StreamMessage<T>) => void
 
 type SubscriptionOptions = {
   symbol: string
@@ -43,8 +43,9 @@ function useWebSocket() {
   const wsRef = useRef<ReconnectingWebSocket | null>(null)
   const { sendWsMessageAsync } = useSendWsMessageAsync()
 
-  // Registry for message handlers by event type
-  const handlersRef = useRef<Map<string, Set<MessageHandler>>>(new Map())
+  const handlersRef = useRef<Map<string, Set<MessageHandler>>>(
+    new Map(), // Use `any` temporarily to allow any T; refined below
+  )
 
   const subscribe = useCallback(
     async (options: SubscriptionOptions) => {
@@ -82,27 +83,26 @@ function useWebSocket() {
         console.log('Unsubscribed:', activeSubscription)
       }
 
+      console.log('New subscription: ', newSubscription)
       ws?.send(createSubscriptionMessagePayload(WsMessageMethods.Subscribe, options))
     },
     [sendWsMessageAsync],
   )
 
-  // Register a handler for a specific event type
-  const onMessage = useCallback((eventType: string, handler: MessageHandler) => {
+  const onMessage = useCallback(<T>(eventType: string, handler: MessageHandler<T>) => {
     if (!handlersRef.current.has(eventType)) {
       handlersRef.current.set(eventType, new Set())
     }
-    handlersRef.current.get(eventType)!.add(handler)
+    handlersRef.current.get(eventType)!.add(handler as MessageHandler)
 
     return () => {
-      handlersRef.current.get(eventType)?.delete(handler)
+      handlersRef.current.get(eventType)?.delete(handler as MessageHandler)
     }
   }, [])
 
-  // Centralized message handling
   const handleMessage = useCallback((event: MessageEvent) => {
-    const message = JSON.parse(event.data)
-    const eventType = message.e // Assuming 'e' is the event type field (e.g., 'depthUpdate')
+    const message = JSON.parse(event.data) as StreamMessage
+    const eventType = message.e
 
     if (eventType && handlersRef.current.has(eventType)) {
       const handlers = handlersRef.current.get(eventType)!

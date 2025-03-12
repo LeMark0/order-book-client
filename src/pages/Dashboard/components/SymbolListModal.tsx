@@ -47,13 +47,12 @@ export const SymbolListModal = ({ isOpen, onClose, data, onChange }: Props) => {
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <div className="flex flex-col gap-4 p-2 max-h-[calc(90vh-4rem)]">
-        {/* Search Field - Pinned at top */}
         <Input
           type="search"
           placeholder="Search symbols..."
           value={inputValue}
           onChange={handleInputChange}
-          className="w-full sticky top-0 z-10 bg-[var(--card)]"
+          className="w-full bg-card"
         />
         <div className="flex-1">
           {filteredData?.length === 0 ? (
@@ -85,7 +84,7 @@ export const SymbolListModal = ({ isOpen, onClose, data, onChange }: Props) => {
                   </div>
                 )
               }}
-              className="scrollbar-hidden"
+              // className="scrollbar-hidden"
             />
           )}
         </div>

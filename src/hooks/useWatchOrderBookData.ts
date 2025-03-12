@@ -19,7 +19,7 @@ export function useWatchOrderBookData(symbol: string | undefined) {
   const handleDepthMessage = useCallback(
     (message: DepthUpdateMessage) => {
       if (symbol && message.s.toLowerCase() === symbol.toLowerCase()) {
-        console.log('handleDepthMessage1: ', message)
+        console.log('handleDepthMessage: ', message)
 
         setOrderBook(message)
       }

@@ -41,6 +41,17 @@ export const Modal = ({ isOpen, onClose, children }: ModalProps) => {
     [isOpen, onClose],
   )
 
+  useEffect(
+    function disablePageScrolling() {
+      document.body.style.overflow = isOpen ? 'hidden' : ''
+
+      return () => {
+        document.body.style.overflow = ''
+      }
+    },
+    [isOpen],
+  )
+
   if (!isMounted) return null
 
   return (
