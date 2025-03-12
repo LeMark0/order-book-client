@@ -53,4 +53,4 @@ As an MVP, this project can be enhanced in several ways:
 -   **Test Coverage**: Expand unit and integration tests for components and hooks.
 -   **Accessibility (a11y)**: Add ARIA labels, keyboard navigation, and screen reader support.
 -   **Better Empty States**: Improve UX for no-data scenarios with informative messages or placeholders.
--   **Error Handling**: Implement robust error boundaries and WebSocket reconnection logic.
+
