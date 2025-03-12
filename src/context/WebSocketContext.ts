@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { StreamMessage, SubscriptionTypes, WsMessageMethods } from '@/api/types.ts'
+import { StreamMessage, SubscriptionTypes, WsMessageMethods } from '@/api/types'
 import { v4 as uuid } from 'uuid'
 import ReconnectingWebSocket from 'reconnecting-websocket'
 import { updateSubscription } from '@/helpers/updateSubscription'
-import { useSendWsMessageAsync } from '@/hooks/useSendWsMessageAsync.ts'
+import { useSendWsMessageAsync } from '@/hooks/useSendWsMessageAsync'
 import { createWSConnection } from '@/api/ws'
-import { buildContext } from '@/lib/buildContext.tsx'
+import { buildContext } from '@/lib/buildContext'
 
 type MessageHandler<T = Record<string, never>> = (message: StreamMessage<T>) => void
 
@@ -43,9 +43,7 @@ function useWebSocket() {
   const wsRef = useRef<ReconnectingWebSocket | null>(null)
   const { sendWsMessageAsync } = useSendWsMessageAsync()
 
-  const handlersRef = useRef<Map<string, Set<MessageHandler>>>(
-    new Map(), // Use `any` temporarily to allow any T; refined below
-  )
+  const handlersRef = useRef<Map<string, Set<MessageHandler>>>(new Map())
 
   const subscribe = useCallback(
     async (options: SubscriptionOptions) => {

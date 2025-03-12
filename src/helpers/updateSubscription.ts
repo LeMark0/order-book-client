@@ -4,7 +4,7 @@ type UpdateSubscriptionOptions = {
   symbol: string
   subscriptionType: SubscriptionType
 }
-// TODO remove
+
 export const updateSubscription = (
   subscriptions: string[],
   options: UpdateSubscriptionOptions,

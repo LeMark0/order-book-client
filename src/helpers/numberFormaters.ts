@@ -47,5 +47,5 @@ export function formatQuantity(value: string): string {
 
   const num = parseFloat(value)
 
-  return num.toFixed(5).replace(/\.?0+$/, '')
+  return num.toFixed(8).replace(/\.?0+$/, '')
 }

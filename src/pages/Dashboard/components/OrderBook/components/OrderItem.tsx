@@ -28,6 +28,7 @@ export const OrderItem = ({ price, quantity, variant, relativeVolume }: Props) =
           'rounded-l-md': variant === 'ask',
         })}
         style={{ width }}
+        data-testid="order-item-bar"
       />
       <span className={`relative z-10 ${textColor}`}>{formatPrice(price)}</span>
       <span className="relative z-10">{formatQuantity(quantity)}</span>
