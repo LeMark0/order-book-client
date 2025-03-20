@@ -3,6 +3,11 @@
 
 A real-time cryptocurrency order book dashboard built with React, TypeScript, and Tailwind CSS. Displays bids and asks for a selected trading pair, fetched via WebSocket, with visual indicators like volume bars and idle state detection.
 
+**[Live demo](https://lemark0-order-book-client.netlify.app/)**
+
+<img width="1296" alt="Screenshot 2025-03-20 at 12 13 03" src="https://github.com/user-attachments/assets/91b63528-c099-41f7-9b1d-7ac72824cda4" />
+
+
 ## Features
 
 -   **Real-Time Updates**: Subscribes to WebSocket streams for live order book data.
