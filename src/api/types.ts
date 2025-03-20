@@ -121,3 +121,9 @@ export type DepthUpdateMessage = StreamMessage<{
   b: OrderEntry[] // Array of bid updates
   a: OrderEntry[] // Array of ask updates
 }>
+
+export type DepthSnapshot = {
+  lastUpdateId: number
+  bids: OrderEntry[]
+  asks: OrderEntry[]
+}

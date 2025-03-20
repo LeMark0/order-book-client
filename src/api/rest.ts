@@ -1,5 +1,11 @@
 import axios from 'axios'
-import { ExchangeInfo, SymbolInfo, SymbolStatistics, TradeDetails } from './types'
+import {
+  DepthSnapshot,
+  ExchangeInfo,
+  SymbolInfo,
+  SymbolStatistics,
+  TradeDetails,
+} from './types'
 
 const BASE_URL = 'https://api.binance.com/api/v3'
 
@@ -10,6 +16,14 @@ export const fetchSymbolsDetails = async (): Promise<SymbolInfo[]> => {
 
 export const fetchSymbolsStatistics = async (): Promise<SymbolStatistics[]> => {
   const response = await axios.get(`${BASE_URL}/ticker/24hr`)
+  return response.data
+}
+
+export const fetchDepthSnapshot = async (
+  symbol: string,
+  limit: number = 5000,
+): Promise<DepthSnapshot> => {
+  const response = await axios.get(`${BASE_URL}/depth`, { params: { symbol, limit } })
   return response.data
 }
 

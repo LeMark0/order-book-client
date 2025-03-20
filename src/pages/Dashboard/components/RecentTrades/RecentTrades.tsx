@@ -1,4 +1,4 @@
-import { useGetRecentTrades } from '@/api/hooks/useGetRecentTrades'
+import { useGetRecentTrades } from '@/api/hooks'
 import { TradeItem } from './components/TradeItem'
 
 type Props = {
@@ -7,6 +7,8 @@ type Props = {
 
 export const RecentTrades = ({ symbol }: Props) => {
   const { data, isLoading, isError, error } = useGetRecentTrades(symbol, 50)
+
+  console.log('useGetRecentTrades.data: ', data)
 
   if (isError) {
     return (

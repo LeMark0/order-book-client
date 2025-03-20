@@ -8,14 +8,14 @@ interface OrderBookProps {
 }
 
 export function OrderBook({ symbol, orderLimit = 17 }: OrderBookProps) {
-  const { data, isIdle } = useWatchOrderBookData(symbol)
+  const { data, isIdle, isLoading } = useWatchOrderBookData(symbol)
 
   const bids = useMemo(() => {
     if (!data) {
       return []
     }
 
-    return data.b
+    return Object.entries(data.bids)
       .filter(([, qty]) => parseFloat(qty) > 0)
       .sort(([priceA], [priceB]) => parseFloat(priceB) - parseFloat(priceA))
       .slice(0, orderLimit)
@@ -26,7 +26,7 @@ export function OrderBook({ symbol, orderLimit = 17 }: OrderBookProps) {
       return []
     }
 
-    return data.a
+    return Object.entries(data.asks)
       .filter(([, qty]) => parseFloat(qty) > 0)
       .sort(([priceA], [priceB]) => parseFloat(priceA) - parseFloat(priceB))
       .slice(0, orderLimit)
@@ -36,7 +36,7 @@ export function OrderBook({ symbol, orderLimit = 17 }: OrderBookProps) {
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-4 md:flex-row">
         <OrderList
-          isLoading={!data}
+          isLoading={!bids.length || isLoading}
           items={bids}
           variant="bid"
           title="Bid"
@@ -44,7 +44,7 @@ export function OrderBook({ symbol, orderLimit = 17 }: OrderBookProps) {
           isIdle={isIdle}
         />
         <OrderList
-          isLoading={!data}
+          isLoading={!asks.length || isLoading}
           items={asks}
           variant="ask"
           title="Ask"
